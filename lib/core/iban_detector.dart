@@ -7,6 +7,7 @@ import 'package:flutter_invoice_scan/core/camera_iban_detector_sink.dart';
 import 'package:flutter_invoice_scan/core/text_detector.dart';
 import 'package:iban/iban.dart' as iban;
 import 'package:rxdart/rxdart.dart';
+import 'package:collection/collection.dart';
 
 class IbanDetector {
   final TextDetector _textDetector;
@@ -45,7 +46,7 @@ class IbanDetector {
         searchBox: _searchRect,
       )
           .then((lines) {
-        var result = _findIbanInLines(lines);
+        var result = _findIbansInLines(lines).firstOrNull;
 
         if (result != null && resultStream.isClosed == false) {
           resultStream.sink.add(result);
@@ -61,11 +62,17 @@ class IbanDetector {
   Future<String?> detectIbanOnFile(File file) async {
     var lines = await _textDetector.detectLinesFromImage(file);
 
-    return _findIbanInLines(lines);
+    return _findIbansInLines(lines).firstOrNull;
   }
 
-  String? _findIbanInLines(List<String> lines) {
-    for (var line in lines) {
+  Future<List<String>> detectMultipleIbanOnFile(File file) async {
+    var lines = await _textDetector.detectLinesFromImage(file);
+
+    return _findIbansInLines(lines);
+  }
+
+  List<String> _findIbansInLines(List<String> lines) {
+    var foundIbans = lines.map((line) {
       if (regExp.hasMatch(line)) {
         var possibleIBAN = regExp.firstMatch(line)!.group(2).toString();
 
@@ -73,9 +80,11 @@ class IbanDetector {
           return iban.toPrintFormat(possibleIBAN);
         }
       }
-    }
 
-    return null;
+      return null;
+    });
+
+    return foundIbans.whereNotNull().toList();
   }
 
   @mustCallSuper
