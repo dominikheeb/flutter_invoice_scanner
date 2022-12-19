@@ -78,7 +78,7 @@ class IbanDetector {
   List<String> _findIbansInLines(List<String> lines) {
     var foundIbans = lines.map((line) {
       if (regExp.hasMatch(line)) {
-        var possibleIBAN = regExp.firstMatch(line)!.group(2).toString();
+        var possibleIBAN = regExp.firstMatch(line)!.group(1).toString();
 
         if (iban.isValid(possibleIBAN)) {
           return iban.toPrintFormat(possibleIBAN);
