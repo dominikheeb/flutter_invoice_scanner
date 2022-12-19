@@ -12,8 +12,8 @@ import 'package:collection/collection.dart';
 class IbanDetector {
   final TextDetector _textDetector;
   final Rect? _searchRect;
-  final RegExp regExp = RegExp(
-    r"^(.*)(([A-Z]{2}[ \-]?[0-9]{2})(?=(?:[ \-]?[A-Z0-9]){9,30}$)((?:[ \-]?[A-Z0-9]{3,5}){2,7})([ \-]?[A-Z0-9]{1,3})?)$",
+  static final RegExp regExp = RegExp(
+    r"(([A-Z]{2}[ \-]?[0-9]{2})(?=(?:[ \-]?[A-Z0-9]){9,30})((?:[ \-]?[A-Z0-9]{3,5}){2,7})([ \-]?[A-Z0-9]{1,3})?)",
     caseSensitive: false,
     multiLine: false,
   );
@@ -21,9 +21,13 @@ class IbanDetector {
   StreamController<CameraDetectorInput>? _cameraImageStreamController;
   StreamSubscription<CameraDetectorInput>? _cameraImageStreamSubscription;
 
-  IbanDetector({required TextDetector textDetector, Rect? searchRect})
+  IbanDetector(
+      {required TextDetector textDetector,
+      Rect? searchRect,
+      StreamController<CameraDetectorInput>? cameraImageStreamController})
       : _textDetector = textDetector,
-        _searchRect = searchRect;
+        _searchRect = searchRect,
+        _cameraImageStreamController = cameraImageStreamController;
 
   CameraIbanDetectorSink initializeCameraDetection(
       {required void Function(String iban) onIbanFound}) {
